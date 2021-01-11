@@ -33,6 +33,7 @@ fn user_handler(req: Request<Body>, user_db: &UserDb)
             let mut users = user_db.lock().unwrap();
             if USERS_PATH.is_match(path) {
                 if method == &Method::GET {
+                    println!("List ...");
                     let list = users.iter()
                         .map(|(id, _)| id.to_string())
                         .collect::<Vec<String>>()
@@ -48,6 +49,8 @@ fn user_handler(req: Request<Body>, user_db: &UserDb)
                      .ok()
                      .map(|x| x as usize)
                 });
+                println!("  id = {:?}", user_id);
+
                 match (method, user_id) {
                     (&Method::GET, Some(id)) => {
                         if let Some(data) = users.get(id) {
@@ -106,5 +109,7 @@ fn main() {
         service_fn(move |req| user_handler(req, &user_db))
     });
     let server = server.map_err(drop);
+    println!("Running ...");
+
     hyper::rt::run(server);
 }
